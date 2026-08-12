@@ -62,7 +62,7 @@ Challenging problems involving advanced algorithms, optimization, dynamic progra
 | 🟢 Easy | <!-- EASY_COUNT --> 4
 | 🟡 Medium | <!-- MEDIUM_COUNT --> 0
 | 🔴 Hard | <!-- HARD_COUNT --> 0
-| 🧩 **Total** | **<!-- TOTAL_COUNT --> 4
+| 🧩 **Total** | **<!-- TOTAL_COUNT --> 4**
 
 **Last updated:** <!-- LAST_UPDATED --> 2026-08-12 16:20 UTC
 
