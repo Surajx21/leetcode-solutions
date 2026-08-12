@@ -1,0 +1,37 @@
+name: Organize LeetCode Solutions
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "leetcode/inbox/**"
+
+permissions:
+  contents: write
+
+jobs:
+  organize:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Organize LeetCode solutions
+        run: python .github/scripts/organize_leetcode.py
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if [[ -n "$(git status --porcelain)" ]]; then
+            git add leetcode
+            git commit -m "chore: organize LeetCode solutions"
+            git push
+          else
+            echo "No changes to commit."
+          fi
