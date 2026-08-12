@@ -17,7 +17,49 @@ def count_problems(directory: Path) -> int:
     if not directory.exists():
         return 0
 
-    return sum(1 for item in directory.iterdir() if item.is_dir())
+    return sum(
+        1
+        for item in directory.iterdir()
+        if item.is_dir()
+    )
+
+
+def update_count(content: str, marker: str, count: int) -> str:
+    """
+    Update only the number after a README marker.
+
+    Example:
+
+        <!-- EASY_COUNT --> 5
+
+    becomes:
+
+        <!-- EASY_COUNT --> 6
+    """
+
+    pattern = rf"({re.escape(marker)}\s*)\d+"
+
+    return re.sub(
+        pattern,
+        rf"\g<1>{count}",
+        content,
+        count=1,
+    )
+
+
+def update_timestamp(content: str, timestamp: str) -> str:
+    """
+    Update only the timestamp after LAST_UPDATED.
+    """
+
+    pattern = r"(<!-- LAST_UPDATED -->\s*)[^\r\n]*"
+
+    return re.sub(
+        pattern,
+        rf"\g<1>{timestamp}",
+        content,
+        count=1,
+    )
 
 
 def main():
@@ -32,42 +74,49 @@ def main():
 
     total = sum(counts.values())
 
-    updated = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
-
-    content = README.read_text(encoding="utf-8")
-
-    # Update the optional statistics section.
-    content = re.sub(
-        r"<!-- EASY_COUNT -->.*",
-        f"<!-- EASY_COUNT --> {counts['Easy']}",
-        content,
+    updated = datetime.now(timezone.utc).strftime(
+        "%Y-%m-%d %H:%M UTC"
     )
 
-    content = re.sub(
-        r"<!-- MEDIUM_COUNT -->.*",
-        f"<!-- MEDIUM_COUNT --> {counts['Medium']}",
-        content,
+    content = README.read_text(
+        encoding="utf-8"
     )
 
-    content = re.sub(
-        r"<!-- HARD_COUNT -->.*",
-        f"<!-- HARD_COUNT --> {counts['Hard']}",
+    # Update only the numbers.
+    content = update_count(
         content,
+        "<!-- EASY_COUNT -->",
+        counts["Easy"],
     )
 
-    content = re.sub(
-        r"<!-- TOTAL_COUNT -->.*",
-        f"<!-- TOTAL_COUNT --> {total}",
+    content = update_count(
         content,
+        "<!-- MEDIUM_COUNT -->",
+        counts["Medium"],
     )
 
-    content = re.sub(
-        r"<!-- LAST_UPDATED -->.*",
-        f"<!-- LAST_UPDATED --> {updated}",
+    content = update_count(
         content,
+        "<!-- HARD_COUNT -->",
+        counts["Hard"],
     )
 
-    README.write_text(content, encoding="utf-8")
+    content = update_count(
+        content,
+        "<!-- TOTAL_COUNT -->",
+        total,
+    )
+
+    # Update only the timestamp.
+    content = update_timestamp(
+        content,
+        updated,
+    )
+
+    README.write_text(
+        content,
+        encoding="utf-8",
+    )
 
     print(f"Easy: {counts['Easy']}")
     print(f"Medium: {counts['Medium']}")
