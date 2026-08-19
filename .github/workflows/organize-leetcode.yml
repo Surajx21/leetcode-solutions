@@ -7,6 +7,11 @@ on:
     paths:
       - "leetcode/inbox/**"
 
+# Prevent multiple organization workflows from modifying main at the same time.
+concurrency:
+  group: organize-leetcode-main
+  cancel-in-progress: false
+
 permissions:
   contents: write
 
@@ -19,22 +24,58 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: main
 
-      - name: Organize LeetCode solutions
-        run: python .github/scripts/organize_leetcode.py
-
-      - name: Update README
-        run: python .github/scripts/update_readme.py
-
-      - name: Commit changes
+      - name: Configure Git
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          if [[ -n "$(git status --porcelain)" ]]; then
+      - name: Organize LeetCode solutions
+        run: |
+          python .github/scripts/organize_leetcode.py
+
+      - name: Update README
+        run: |
+          python .github/scripts/update_readme.py
+
+      - name: Commit and push changes
+        run: |
+          for attempt in 1 2 3; do
+            echo "Push attempt $attempt"
+
+            # Get the latest version of main.
+            git fetch origin main
+
+            # Make sure our local branch is based on the latest remote main.
+            git reset --hard origin/main
+
+            # Run the scripts again after syncing with the latest main.
+            python .github/scripts/organize_leetcode.py
+            python .github/scripts/update_readme.py
+
+            # Check whether the scripts actually changed anything.
+            if [[ -z "$(git status --porcelain)" ]]; then
+              echo "No changes to commit."
+              exit 0
+            fi
+
+            # Commit the generated changes.
             git add leetcode README.md
             git commit -m "chore: organize LeetCode solutions"
-            git push
-          else
-            echo "No changes to commit."
-          fi
+
+            # Push to main.
+            if git push origin HEAD:main; then
+              echo "Changes pushed successfully."
+              exit 0
+            fi
+
+            echo "Push rejected because main changed."
+            echo "Retrying with the latest main..."
+
+            # Clean up before the next attempt.
+            git reset --hard origin/main
+          done
+
+          echo "Failed to push changes after 3 attempts."
+          exit 1
