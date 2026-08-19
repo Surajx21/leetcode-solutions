@@ -61,10 +61,10 @@ Challenging problems involving advanced algorithms, optimization, dynamic progra
 |:----------:|:------:|
 | 🟢 Easy | <!-- EASY_COUNT --> 9
 | 🟡 Medium | <!-- MEDIUM_COUNT --> 3
-| 🔴 Hard | <!-- HARD_COUNT --> 0
-| 🧩 **Total** | **<!-- TOTAL_COUNT --> 12**
+| 🔴 Hard | <!-- HARD_COUNT --> 1
+| 🧩 **Total** | **<!-- TOTAL_COUNT --> 13**
 
-**Last updated:** <!-- LAST_UPDATED --> 2026-08-18 11:33 UTC
+**Last updated:** <!-- LAST_UPDATED --> 2026-08-19 07:01 UTC
 
 ## ⚙️ Automation
 
